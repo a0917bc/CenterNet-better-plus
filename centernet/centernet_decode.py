@@ -2,10 +2,13 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
-
+try:
+    import torchsnooper
+except:
+    pass
 from .transforms import CenterAffine
 
-
+# @torchsnooper.snoop()
 def gather_feature(fmap, index, mask=None, use_transform=False):
     if use_transform:
         # change a (N, C, H, W) tenor to (N, HxW, C) shape
@@ -25,6 +28,7 @@ def gather_feature(fmap, index, mask=None, use_transform=False):
 
 class CenterNetDecoder(object):
     @staticmethod
+    # @torchsnooper.snoop()
     def decode(fmap, wh, reg=None, cat_spec_wh=False, K=100):
         r"""
         decode output feature map to detection results
@@ -69,6 +73,7 @@ class CenterNetDecoder(object):
         return detections
 
     @staticmethod
+    # @torchsnooper.snoop()
     def transform_boxes(boxes, img_info, scale=1):
         r"""
         transform predicted boxes to target boxes
@@ -92,6 +97,7 @@ class CenterNetDecoder(object):
         return target_boxes
 
     @staticmethod
+    # @torchsnooper.snoop()
     def pseudo_nms(fmap, pool_size=3):
         r"""
         apply max pooling to get the same effect of nms
@@ -102,10 +108,11 @@ class CenterNetDecoder(object):
         """
         pad = (pool_size - 1) // 2
         fmap_max = F.max_pool2d(fmap, pool_size, stride=1, padding=pad)
-        keep = (fmap_max == fmap).float()
+        keep = (fmap_max == fmap).float() # 當 fmap 的值等於 fmap_max 對應位置的值時，掩碼張量的值為1，否則為0。
         return fmap * keep
 
     @staticmethod
+    # @torchsnooper.snoop()
     def topk_score(scores, K=40):
         """
         get top K point in score map

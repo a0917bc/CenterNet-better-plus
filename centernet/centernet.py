@@ -123,6 +123,8 @@ class CenterNet(nn.Module):
         pixel_mean = torch.Tensor(cfg.MODEL.PIXEL_MEAN).to(self.device).view(3, 1, 1)
         pixel_std = torch.Tensor(cfg.MODEL.PIXEL_STD).to(self.device).view(3, 1, 1)
         self.normalizer = lambda x: (x - pixel_mean) / pixel_std
+        self.pixel_mean = torch.Tensor(cfg.MODEL.PIXEL_MEAN).to(self.device).view(1, 3, 1, 1)
+        # self.pixel_std = torch.Tensor(cfg.MODEL.PIXEL_STD).to(self.device).view(1, 3, 1, 1)
 
         self.to(self.device)
 
@@ -262,8 +264,15 @@ class CenterNet(nn.Module):
         """
         Normalize, pad and batch the input images.
         """
+        # print(batched_inputs)
+        # print(len(batched_inputs))
+        # print(batched_inputs[0].keys())
+        # exit()
         images = [x["image"].to(self.device) for x in batched_inputs]
-        images = [self.normalizer(img/255.) for img in images]
+        # Use torck.stack to concatenate images
+        # images = torch.stack([x["image"].to(self.device) for x in batched_inputs])
+        images = [self.normalizer(img/255.) for img in images] # float() and normalize
+        # images = images.sub_(self.pixel_mean).div_(self.pixel_std)
         images = ImageList.from_tensors(images, self.backbone.size_divisibility)
         return images
 

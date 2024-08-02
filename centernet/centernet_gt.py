@@ -67,7 +67,7 @@ class CenterNetGT(object):
             CenterNetGT.draw_gaussian(fmap[channel_index], centers_int[i], radius[i])
 
     @staticmethod
-    def get_gaussian_radius(box_size, min_overlap):
+    def get_gaussian_radius(box_size, min_overlap=0.7):
         """
         copyed from CornerNet
         box_size (w, h), it could be a torch.Tensor, numpy.ndarray, list or tuple
@@ -80,19 +80,19 @@ class CenterNetGT(object):
         b1 = height + width
         c1 = width * height * (1 - min_overlap) / (1 + min_overlap)
         sq1 = torch.sqrt(b1 ** 2 - 4 * a1 * c1)
-        r1 = (b1 + sq1) / 2
+        r1 = (b1 + sq1) / (2*a1)
 
         a2 = 4
         b2 = 2 * (height + width)
         c2 = (1 - min_overlap) * width * height
         sq2 = torch.sqrt(b2 ** 2 - 4 * a2 * c2)
-        r2 = (b2 + sq2) / 2
+        r2 = (b2 + sq2) / (2*a2)
 
         a3 = 4 * min_overlap
         b3 = -2 * min_overlap * (height + width)
         c3 = (min_overlap - 1) * width * height
         sq3 = torch.sqrt(b3 ** 2 - 4 * a3 * c3)
-        r3 = (b3 + sq3) / 2
+        r3 = (b3 + sq3) / (2*a3)
 
         return torch.min(r1, torch.min(r2, r3))
 
